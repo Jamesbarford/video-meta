@@ -1,4 +1,4 @@
-module video-metadata
+module github.com/Jamesbarford/video-meta
 
 go 1.21.0
 

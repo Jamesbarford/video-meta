@@ -1,10 +1,9 @@
 package main
 
 import (
-    "fmt"
+    "Jamesbarford/video-meta/server"
 )
 
-
 func main() {
-	fmt.Println("Hello world")
+    ServerMain()
 }

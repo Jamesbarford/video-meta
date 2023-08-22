@@ -1,0 +1,10 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS meta_data (
+    id SERIAL PRIMARY KEY,
+    video_id INT NOT NULL,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL
+);
+
+COMMIT;

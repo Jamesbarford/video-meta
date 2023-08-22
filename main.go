@@ -1,9 +1,9 @@
 package main
 
 import (
-    "Jamesbarford/video-meta/server"
+	"github.com/Jamesbarford/video-meta/server"
 )
 
 func main() {
-    ServerMain()
+	server.ServerMain("8080")
 }

@@ -1,5 +1,5 @@
 # Multi stage build, do the building in the builder container
-FROM golang:1.21-0-alpine3.17 AS builder
+FROM golang:alpine3.18 AS builder
 
 ARG DB_USER
 ARG DB_PASSWORD
@@ -8,13 +8,13 @@ ARG DB_NAME
 ARG DB_HOST
 
 ENV APP api.out
-ENV APP_DIR $GOPATH/src/github.com/crypto-server
+ENV APP_DIR /app/
 
 WORKDIR $APP_DIR
 
 RUN apk add make
 
-COPY ./src ./src
+COPY ./server ./server/
 COPY main.go .
 COPY go.mod .
 COPY go.sum .
@@ -24,7 +24,7 @@ RUN go mod download
 RUN make
 
 # This is what would get sent to ECR
-FROM golang:1.21-0-alpine3.17
+FROM golang:alpine3.18
 
 ARG DB_USER
 ARG DB_PASSWORD
@@ -39,7 +39,12 @@ ENV DB_NAME $DB_NAME
 ENV DB_HOST $DB_HOST
 
 WORKDIR $APP_DIR
-COPY --chown=0:0 --from=builder $GOPATH/src/github.com/crypto-server/api.out ./api.out
+
+# Copy binary from builder stage
+COPY --from=builder /app/api.out ./api.out
+
+# Expose port
 EXPOSE 8080
 
+# Run the binary
 CMD ["./api.out"]

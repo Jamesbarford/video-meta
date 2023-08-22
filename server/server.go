@@ -1,15 +1,33 @@
-package server 
+package server
 
 import (
 	"fmt"
-	"net/http"
+
+	"github.com/Jamesbarford/video-meta/server/database"
+	"github.com/Jamesbarford/video-meta/server/middleware"
+	"github.com/Jamesbarford/video-meta/server/video"
 	"github.com/labstack/echo/v4"
 )
 
-func ServerMain() {
-    e := echo.New()
-    e.GET(".", func (c echo.Context) error {
-        return c.String(http.StatusOK, "HelloWorld!")
-    })
-    e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", "8080")))
+const API_KEY = "SUPER_SECRET"
+
+func ServerMain(port string) {
+	db, err := database.NewDbConnection(database.DbConfigFromEnvironment())
+	if err != nil {
+		panic("Failed to connect to database: " + err.Error())
+	}
+
+	e := echo.New()
+	e.Use(middleware.APIKeyMiddleware(API_KEY))
+
+	repository := video.NewVideoMetaRepository(db)
+	service := video.NewVideoMetaService(repository)
+	handler := video.NewVideoMetaHandler(service)
+
+	e.POST("/:videoId", handler.CreateVideoMeta)
+	e.GET("/:videoId", handler.ReadVideoMeta)
+	e.PUT("/:metaId", handler.UpdateVideoMeta)
+	e.DELETE("/:metaId", handler.DeleteVideoMeta)
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
